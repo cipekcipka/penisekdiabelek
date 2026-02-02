@@ -48,32 +48,42 @@ imageInput.addEventListener('change', (event) => {
     upload.classList.remove("upload_loaded");
     upload.classList.add("upload_loading");
 
-    upload.removeAttribute("selected")
+    upload.removeAttribute("selected");
 
     var file = imageInput.files[0];
     var data = new FormData();
     data.append("image", file);
 
-    fetch("https://api.imgur.com/3/image/" ,{
+    // Using ImgBB API
+    fetch("https://api.imgbb.com/1/upload?key=786b0a831e30612da1dc21fa946e9252", {
         method: 'POST',
-        headers: {
-            'Authorization': 'Client-ID c 27369172c61327'
-        },
         body: data
     })
     .then(result => result.json())
     .then(response => {
-        
-        var url = response.data.link;
-        upload.classList.remove("error_shown")
-        upload.setAttribute("selected", url);
-        upload.classList.add("upload_loaded");
-        upload.classList.remove("upload_loading");
-        upload.querySelector(".upload_uploaded").src = url;
+
+        if(response.success){
+            var url = response.data.url;
+            upload.classList.remove("error_shown");
+            upload.setAttribute("selected", url);
+            upload.classList.add("upload_loaded");
+            upload.classList.remove("upload_loading");
+            upload.querySelector(".upload_uploaded").src = url;
+        } else {
+            console.error("Upload failed:", response);
+            upload.classList.remove("upload_loading");
+            upload.classList.add("error_shown");
+        }
 
     })
+    .catch(err => {
+        console.error("Upload error:", err);
+        upload.classList.remove("upload_loading");
+        upload.classList.add("error_shown");
+    });
 
-})
+});
+
 
 document.querySelector(".go").addEventListener('click', () => {
 
